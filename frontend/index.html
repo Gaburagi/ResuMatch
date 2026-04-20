@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResuMatch - Resume & Job Description Matcher</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ResuMatch</h1>
+            <p class="subtitle">NLP-Based Resume & Job Description Matching System</p>
+        </header>
+
+        <main>
+            <div class="content-wrapper">
+                <!-- Resume Section -->
+                <div class="input-section">
+                    <h2>Resume</h2>
+                    <textarea 
+                        id="resumeInput" 
+                        class="textarea" 
+                        placeholder="Paste your resume text here..."
+                        rows="12">
+                    </textarea>
+                </div>
+
+                <!-- Match Button -->
+                <div class="button-section">
+                    <button id="matchBtn" class="match-button" onclick="matchDocuments()">
+                        Match Resume with Job Description
+                    </button>
+                </div>
+
+                <!-- Job Description Section -->
+                <div class="input-section">
+                    <h2>Job Description</h2>
+                    <textarea 
+                        id="jobInput" 
+                        class="textarea" 
+                        placeholder="Paste the job description text here..."
+                        rows="12">
+                    </textarea>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="results-section hidden">
+                <h2>Matching Results</h2>
+                
+                <div class="result-card match-score">
+                    <h3>Match Score</h3>
+                    <div class="score-display">
+                        <span id="matchScore" class="score-value">--</span>
+                        <span class="score-unit">%</span>
+                    </div>
+                    <div class="score-bar">
+                        <div id="scoreBar" class="score-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Matched Keywords</h3>
+                    <div id="matchedKeywords" class="keywords-list"></div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Missing Keywords</h3>
+                    <div id="missingKeywords" class="keywords-list"></div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Recommendations</h3>
+                    <ul id="recommendations" class="recommendations-list"></ul>
+                </div>
+
+                <button class="reset-button" onclick="resetForm()">Start New Match</button>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner hidden">
+                <div class="spinner"></div>
+                <p>Analyzing documents...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message hidden"></div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 ResuMatch. NLP-powered matching system for resumes and job descriptions.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
