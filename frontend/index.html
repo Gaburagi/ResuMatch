@@ -1,25 +1,687 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ResuMatch</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ResuMatch</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16161a;
+      --surface2: #1e1e24;
+      --border: #2a2a35;
+      --accent: #6ee7b7;
+      --accent2: #818cf8;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --rank1: #6ee7b7;
+      --rank2: #818cf8;
+      --rank3: #f472b6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(110,231,183,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(110,231,183,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 56px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .tagline {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 300;
+      letter-spacing: 0.02em;
+    }
+
+    /* Input Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface2);
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(110,231,183,0.04);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .drop-text {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .drop-text span {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .file-name {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 500;
+      display: none;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 300;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.6;
+    }
+
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--muted); }
+
+    /* Button */
+    .match-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 14px;
+      color: #0d0d0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .match-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .match-btn:active { transform: translateY(0); }
+    .match-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Loading */
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .loader.active { display: block; }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    /* Results */
+    .results { display: none; }
+    .results.active { display: block; animation: fadeUp 0.5s ease both; }
+
+    .results-header {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* Match Cards */
+    .match-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .match-card:hover { transform: translateY(-2px); }
+
+    .match-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+    }
+
+    .match-card.rank-1 { border-color: rgba(110,231,183,0.3); }
+    .match-card.rank-1::before { background: var(--rank1); }
+    .match-card.rank-2 { border-color: rgba(129,140,248,0.25); }
+    .match-card.rank-2::before { background: var(--rank2); }
+    .match-card.rank-3, .match-card.rank-4 { border-color: rgba(244,114,182,0.2); }
+    .match-card.rank-3::before, .match-card.rank-4::before { background: var(--rank3); }
+    .match-card.rank-5 { border-color: var(--border); }
+    .match-card.rank-5::before { background: var(--muted); }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .job-info { flex: 1; }
+
+    .rank-badge {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .rank-1 .rank-badge { color: var(--rank1); }
+    .rank-2 .rank-badge { color: var(--rank2); }
+    .rank-3 .rank-badge, .rank-4 .rank-badge { color: var(--rank3); }
+    .rank-5 .rank-badge { color: var(--muted); }
+
+    .job-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .rank-1 .job-title { font-size: 1.6rem; }
+    .rank-2 .job-title { font-size: 1.3rem; }
+    .rank-3 .job-title, .rank-4 .job-title { font-size: 1.1rem; }
+    .rank-5 .job-title { font-size: 1rem; }
+
+    .score-ring {
+      flex-shrink: 0;
+      width: 64px;
+      height: 64px;
+      position: relative;
+    }
+
+    .rank-2 .score-ring, .rank-3 .score-ring,
+    .rank-4 .score-ring, .rank-5 .score-ring {
+      width: 52px;
+      height: 52px;
+    }
+
+    .score-ring svg { transform: rotate(-90deg); }
+
+    .score-ring .track { fill: none; stroke: var(--border); stroke-width: 3; }
+    .score-ring .fill {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease;
+    }
+
+    .rank-1 .score-ring .fill { stroke: var(--rank1); }
+    .rank-2 .score-ring .fill { stroke: var(--rank2); }
+    .rank-3 .score-ring .fill, .rank-4 .score-ring .fill { stroke: var(--rank3); }
+    .rank-5 .score-ring .fill { stroke: var(--muted); }
+
+    .score-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--text);
+    }
+
+    /* Score Bar */
+    .score-bar-wrap {
+      margin-bottom: 16px;
+    }
+
+    .score-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .score-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1.2s ease;
+      width: 0%;
+    }
+
+    .rank-1 .score-bar-fill { background: var(--rank1); }
+    .rank-2 .score-bar-fill { background: var(--rank2); }
+    .rank-3 .score-bar-fill, .rank-4 .score-bar-fill { background: var(--rank3); }
+    .rank-5 .score-bar-fill { background: var(--muted); }
+
+    /* Explanation */
+    .explanation {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 0.875rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: #b0b0c0;
+      margin-bottom: 14px;
+    }
+
+    .explanation strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* Keywords */
+    .keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .keyword {
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: 1px solid;
+    }
+
+    .rank-1 .keyword { border-color: rgba(110,231,183,0.3); color: var(--rank1); background: rgba(110,231,183,0.06); }
+    .rank-2 .keyword { border-color: rgba(129,140,248,0.3); color: var(--accent2); background: rgba(129,140,248,0.06); }
+    .rank-3 .keyword, .rank-4 .keyword { border-color: rgba(244,114,182,0.3); color: var(--rank3); background: rgba(244,114,182,0.06); }
+    .rank-5 .keyword { border-color: var(--border); color: var(--muted); background: transparent; }
+
+    /* Recommendation box */
+    .recommendation {
+      margin-top: 32px;
+      background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(129,140,248,0.08));
+      border: 1px solid rgba(110,231,183,0.2);
+      border-radius: 20px;
+      padding: 28px;
+    }
+
+    .rec-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .rec-text {
+      font-size: 0.9rem;
+      font-weight: 300;
+      line-height: 1.8;
+      color: #b0b0c0;
+    }
+
+    .rec-text strong { color: var(--text); font-weight: 500; }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>ResuMatch</h1>
-        <p class="subtitle">Paste your resume below to find your top matching jobs</p>
+  <div class="wrapper">
+    <header>
+      <div class="logo">ResuMatch</div>
+      <div class="tagline">Paste your resume or upload a PDF — find your top job matches instantly</div>
+    </header>
 
-        <textarea id="resume-input" placeholder="Paste your resume text here..."></textarea>
+    <div class="card">
+      <div class="card-title">Upload Resume</div>
 
-        <button id="match-btn" onclick="matchResume()">Find Matches</button>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="pdfInput" accept=".pdf" />
+        <div class="drop-icon">📄</div>
+        <div class="drop-text"><span>Click to upload</span> or drag & drop a PDF</div>
+        <div class="file-name" id="fileName"></div>
+      </div>
 
-        <div id="results" class="results hidden">
-            <h2>Top Matching Jobs</h2>
-            <div id="matches-list"></div>
-        </div>
+      <div class="divider">or paste text below</div>
+
+      <textarea id="resumeInput" placeholder="Paste your resume text here — skills, experience, education..."></textarea>
+
+      <button class="match-btn" id="matchBtn" onclick="matchResume()">Find My Matches →</button>
     </div>
-    <script src="script.js"></script>
+
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      Analyzing your resume...
+    </div>
+
+    <div class="results" id="results">
+      <div class="results-header">Top Matching Jobs</div>
+      <div id="matchesList"></div>
+      <div class="recommendation" id="recommendation"></div>
+    </div>
+  </div>
+
+  <script>
+    // PDF.js setup
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const dropZone = document.getElementById('dropZone');
+    const pdfInput = document.getElementById('pdfInput');
+    const fileNameEl = document.getElementById('fileName');
+    const resumeInput = document.getElementById('resumeInput');
+
+    // Drag & drop
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/pdf') handlePDF(file);
+    });
+
+    pdfInput.addEventListener('change', () => {
+      if (pdfInput.files[0]) handlePDF(pdfInput.files[0]);
+    });
+
+    async function handlePDF(file) {
+      fileNameEl.textContent = '📎 ' + file.name;
+      fileNameEl.style.display = 'block';
+      resumeInput.value = 'Extracting text from PDF...';
+      resumeInput.disabled = true;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
+        let text = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map(s => s.str).join(' ') + '\n';
+        }
+        resumeInput.value = text.trim();
+        resumeInput.disabled = false;
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    const rankLabels = ['🥇 Best Match', '🥈 Strong Match', '🥉 Good Match', '#4 Match', '#5 Match'];
+    const rankClasses = ['rank-1', 'rank-2', 'rank-3', 'rank-4', 'rank-5'];
+
+    function buildExplanation(job, score, index, keywords) {
+      const intros = [
+        `Your resume is a <strong>strong fit</strong> for this role.`,
+        `Your background <strong>aligns well</strong> with this position.`,
+        `There's a <strong>solid overlap</strong> between your skills and this role.`,
+        `Your profile shows <strong>relevant experience</strong> for this position.`,
+        `You have <strong>some matching skills</strong> for this role.`
+      ];
+      const kw = keywords.length > 0
+        ? ` Key terms like <strong>${keywords.slice(0,3).join('</strong>, <strong>')}</strong> from your resume align with what this role typically requires.`
+        : '';
+      return `${intros[index]}${kw} With a match score of <strong>${score}%</strong>, this role ranks ${index + 1} out of your top 5.`;
+    }
+
+    function buildRecommendation(matches) {
+      const top = matches[0];
+      return `
+        <div class="rec-title">💡 Recommendation</div>
+        <div class="rec-text">
+          Based on your resume, you are most aligned with <strong>${top.job_title}</strong> roles.
+          To improve your match scores, consider adding more <strong>specific technical skills</strong>,
+          <strong>measurable achievements</strong>, and <strong>relevant certifications</strong> to your resume.
+          Tailoring your resume to include keywords from the job description can significantly boost your compatibility score.
+        </div>
+      `;
+    }
+
+    function extractKeywords(jobTitle) {
+      const keywordMap = {
+        'machine learning': ['machine learning', 'python', 'scikit-learn', 'deep learning', 'neural', 'model', 'data'],
+        'python': ['python', 'django', 'flask', 'api', 'backend', 'scripting'],
+        'java': ['java', 'spring', 'backend', 'oop', 'microservices'],
+        'data': ['data', 'sql', 'analysis', 'visualization', 'pandas', 'excel'],
+        'web': ['html', 'css', 'javascript', 'react', 'frontend', 'design'],
+        'devops': ['docker', 'kubernetes', 'ci/cd', 'aws', 'linux', 'pipeline'],
+        'full stack': ['react', 'node', 'javascript', 'api', 'database', 'frontend'],
+        'software engineer': ['algorithms', 'data structures', 'system design', 'api', 'oop'],
+      };
+      const title = jobTitle.toLowerCase();
+      for (const [key, words] of Object.entries(keywordMap)) {
+        if (title.includes(key)) return words;
+      }
+      return ['relevant skills', 'experience', 'technical knowledge'];
+    }
+
+    function buildScoreRing(score, size = 64) {
+      const r = (size / 2) - 5;
+      const circ = 2 * Math.PI * r;
+      const offset = circ - (score / 100) * circ;
+      return `
+        <div class="score-ring" style="width:${size}px;height:${size}px">
+          <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+            <circle class="track" cx="${size/2}" cy="${size/2}" r="${r}"/>
+            <circle class="fill" cx="${size/2}" cy="${size/2}" r="${r}"
+              stroke-dasharray="${circ}"
+              stroke-dashoffset="${circ}"
+              data-offset="${offset}"/>
+          </svg>
+          <div class="score-text">${score}%</div>
+        </div>`;
+    }
+
+    function displayResults(matches) {
+      const list = document.getElementById('matchesList');
+      const rec = document.getElementById('recommendation');
+      list.innerHTML = '';
+
+      matches.forEach((match, i) => {
+        const rankClass = rankClasses[i] || 'rank-5';
+        const size = i === 0 ? 64 : 52;
+        const keywords = extractKeywords(match.job_title);
+        const explanation = buildExplanation(match.job_title, match.score, i, keywords);
+
+        const card = document.createElement('div');
+        card.className = `match-card ${rankClass}`;
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="job-info">
+              <div class="rank-badge">${rankLabels[i]}</div>
+              <div class="job-title">${match.job_title}</div>
+            </div>
+            ${buildScoreRing(match.score, size)}
+          </div>
+          <div class="score-bar-wrap">
+            <div class="score-bar-label">
+              <span>Match Score</span><span>${match.score}%</span>
+            </div>
+            <div class="score-bar">
+              <div class="score-bar-fill" data-width="${Math.min(match.score * 3, 100)}"></div>
+            </div>
+          </div>
+          <div class="explanation">${explanation}</div>
+          <div class="keywords">
+            ${keywords.map(k => `<span class="keyword">${k}</span>`).join('')}
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      rec.innerHTML = buildRecommendation(matches);
+
+      document.getElementById('results').classList.add('active');
+
+      // Animate bars and rings after render
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.score-bar-fill').forEach(el => {
+          el.style.width = el.dataset.width + '%';
+        });
+        document.querySelectorAll('.score-ring .fill').forEach(el => {
+          setTimeout(() => {
+            el.style.strokeDashoffset = el.dataset.offset;
+          }, 100);
+        });
+      });
+    }
+
+    async function matchResume() {
+      const text = resumeInput.value.trim();
+      if (!text || text === 'Extracting text from PDF...') {
+        alert('Please paste your resume or upload a PDF first!');
+        return;
+      }
+
+      const btn = document.getElementById('matchBtn');
+      btn.disabled = true;
+      btn.textContent = 'Analyzing...';
+      document.getElementById('loader').classList.add('active');
+      document.getElementById('results').classList.remove('active');
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/match', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resume: text })
+        });
+        const data = await res.json();
+        displayResults(data.matches);
+      } catch {
+        alert('Error connecting to backend. Make sure Flask is running!');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Find My Matches →';
+        document.getElementById('loader').classList.remove('active');
+      }
+    }
+  </script>
 </body>
 </html>
