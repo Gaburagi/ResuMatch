@@ -212,9 +212,30 @@
       padding: 48px;
       color: var(--muted);
       font-size: 0.9rem;
+      background: linear-gradient(180deg, rgba(22,22,26,0.74), rgba(22,22,26,0.3));
+      border: 1px solid rgba(110,231,183,0.2);
+      border-radius: 16px;
     }
 
     .loader.active { display: block; }
+
+    .loader-message {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .loader-message .dots::after {
+      content: '';
+      display: inline-block;
+      width: 1.3em;
+      text-align: left;
+      color: var(--accent);
+      animation: ellipsis 1.2s steps(4, end) infinite;
+    }
 
     .spinner {
       width: 36px;
@@ -225,6 +246,33 @@
       animation: spin 0.8s linear infinite;
       margin: 0 auto 16px;
     }
+
+    .scanline-wrap {
+      width: min(460px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 8px;
+    }
+
+    .scanline {
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.07);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scanline::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, rgba(110,231,183,0), rgba(110,231,183,0.8), rgba(129,140,248,0.9), rgba(110,231,183,0));
+      animation: scanline 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    .scanline:nth-child(2)::after { animation-delay: 0.2s; }
+    .scanline:nth-child(3)::after { animation-delay: 0.4s; }
 
     /* Results */
     .results { display: none; }
@@ -263,6 +311,24 @@
 
     .match-card.rank-1 { border-color: rgba(110,231,183,0.3); }
     .match-card.rank-1::before { background: var(--rank1); }
+    .match-card.rank-1.top-match-glow {
+      border-color: rgba(110,231,183,0.75);
+      box-shadow:
+        0 0 28px rgba(110,231,183,0.34),
+        0 0 60px rgba(110,231,183,0.24),
+        inset 0 0 34px rgba(110,231,183,0.16),
+        0 0 0 1px rgba(110,231,183,0.75);
+      animation: topGlow 2.4s ease-in-out infinite;
+    }
+
+    .match-card.rank-1.top-match-glow::after {
+      content: '';
+      position: absolute;
+      inset: -35% -5%;
+      background: radial-gradient(circle at 18% 12%, rgba(110,231,183,0.42) 0%, rgba(110,231,183,0) 55%);
+      pointer-events: none;
+      animation: glowDrift 4.5s linear infinite;
+    }
     .match-card.rank-2 { border-color: rgba(129,140,248,0.25); }
     .match-card.rank-2::before { background: var(--rank2); }
     .match-card.rank-3, .match-card.rank-4 { border-color: rgba(244,114,182,0.2); }
@@ -451,6 +517,41 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    @keyframes ellipsis {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75%, 100% { content: '...'; }
+    }
+
+    @keyframes topGlow {
+      0%, 100% {
+        box-shadow:
+          0 0 26px rgba(110,231,183,0.28),
+          0 0 48px rgba(110,231,183,0.2),
+          inset 0 0 30px rgba(110,231,183,0.12),
+          0 0 0 1px rgba(110,231,183,0.65);
+      }
+      50% {
+        box-shadow:
+          0 0 38px rgba(110,231,183,0.5),
+          0 0 74px rgba(110,231,183,0.34),
+          inset 0 0 44px rgba(110,231,183,0.2),
+          0 0 0 1px rgba(110,231,183,0.9);
+      }
+    }
+
+    @keyframes glowDrift {
+      0% { transform: translateX(-6%) translateY(0); opacity: 0.1; }
+      50% { transform: translateX(6%) translateY(-2%); opacity: 0.22; }
+      100% { transform: translateX(-6%) translateY(0); opacity: 0.1; }
+    }
+
+    @keyframes scanline {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
   </style>
 </head>
 <body>
@@ -479,7 +580,12 @@
 
     <div class="loader" id="loader">
       <div class="spinner"></div>
-      Analyzing your resume...
+      <div class="loader-message"><span id="loaderText">Looking for your best match</span><span class="dots"></span></div>
+      <div class="scanline-wrap" aria-hidden="true">
+        <div class="scanline"></div>
+        <div class="scanline"></div>
+        <div class="scanline"></div>
+      </div>
     </div>
 
     <div class="results" id="results">
@@ -498,6 +604,32 @@
     const pdfInput = document.getElementById('pdfInput');
     const fileNameEl = document.getElementById('fileName');
     const resumeInput = document.getElementById('resumeInput');
+    const loaderTextEl = document.getElementById('loaderText');
+    let loaderTextInterval;
+
+    function startLoaderTextAnimation() {
+      const phrases = [
+        'Looking for your best match',
+        'Scanning role keywords',
+        'Comparing your strengths'
+      ];
+      let index = 0;
+      loaderTextEl.textContent = phrases[index];
+      clearInterval(loaderTextInterval);
+      loaderTextInterval = setInterval(() => {
+        index = (index + 1) % phrases.length;
+        loaderTextEl.textContent = phrases[index];
+      }, 1300);
+    }
+
+    function stopLoaderTextAnimation() {
+      clearInterval(loaderTextInterval);
+      loaderTextEl.textContent = 'Looking for your best match';
+    }
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     // Drag & drop
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -611,7 +743,7 @@
         const explanation = buildExplanation(match.job_title, match.score, i, keywords);
 
         const card = document.createElement('div');
-        card.className = `match-card ${rankClass}`;
+        card.className = `match-card ${rankClass}${i === 0 ? ' top-match-glow' : ''}`;
         card.innerHTML = `
           <div class="card-top">
             <div class="job-info">
@@ -662,16 +794,20 @@
 
       const btn = document.getElementById('matchBtn');
       btn.disabled = true;
-      btn.textContent = 'Analyzing...';
+      btn.textContent = 'Looking...';
       document.getElementById('loader').classList.add('active');
+      startLoaderTextAnimation();
       document.getElementById('results').classList.remove('active');
 
       try {
-        const res = await fetch('http://127.0.0.1:5000/match', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ resume: text })
-        });
+        const [res] = await Promise.all([
+          fetch('http://127.0.0.1:5000/match', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resume: text })
+          }),
+          wait(1400)
+        ]);
         const data = await res.json();
         displayResults(data.matches);
       } catch {
@@ -680,6 +816,7 @@
         btn.disabled = false;
         btn.textContent = 'Find My Matches →';
         document.getElementById('loader').classList.remove('active');
+        stopLoaderTextAnimation();
       }
     }
   </script>
