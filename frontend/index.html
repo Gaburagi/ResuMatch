@@ -212,9 +212,30 @@
       padding: 48px;
       color: var(--muted);
       font-size: 0.9rem;
+      background: linear-gradient(180deg, rgba(22,22,26,0.74), rgba(22,22,26,0.3));
+      border: 1px solid rgba(110,231,183,0.2);
+      border-radius: 16px;
     }
 
     .loader.active { display: block; }
+
+    .loader-message {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .loader-message .dots::after {
+      content: '';
+      display: inline-block;
+      width: 1.3em;
+      text-align: left;
+      color: var(--accent);
+      animation: ellipsis 1.2s steps(4, end) infinite;
+    }
 
     .spinner {
       width: 36px;
@@ -225,6 +246,33 @@
       animation: spin 0.8s linear infinite;
       margin: 0 auto 16px;
     }
+
+    .scanline-wrap {
+      width: min(460px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 8px;
+    }
+
+    .scanline {
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.07);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scanline::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, rgba(110,231,183,0), rgba(110,231,183,0.8), rgba(129,140,248,0.9), rgba(110,231,183,0));
+      animation: scanline 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    .scanline:nth-child(2)::after { animation-delay: 0.2s; }
+    .scanline:nth-child(3)::after { animation-delay: 0.4s; }
 
     /* Results */
     .results { display: none; }
@@ -263,6 +311,24 @@
 
     .match-card.rank-1 { border-color: rgba(110,231,183,0.3); }
     .match-card.rank-1::before { background: var(--rank1); }
+    .match-card.rank-1.top-match-glow {
+      border-color: rgba(110,231,183,0.75);
+      box-shadow:
+        0 0 28px rgba(110,231,183,0.34),
+        0 0 60px rgba(110,231,183,0.24),
+        inset 0 0 34px rgba(110,231,183,0.16),
+        0 0 0 1px rgba(110,231,183,0.75);
+      animation: topGlow 2.4s ease-in-out infinite;
+    }
+
+    .match-card.rank-1.top-match-glow::after {
+      content: '';
+      position: absolute;
+      inset: -35% -5%;
+      background: radial-gradient(circle at 18% 12%, rgba(110,231,183,0.42) 0%, rgba(110,231,183,0) 55%);
+      pointer-events: none;
+      animation: glowDrift 4.5s linear infinite;
+    }
     .match-card.rank-2 { border-color: rgba(129,140,248,0.25); }
     .match-card.rank-2::before { background: var(--rank2); }
     .match-card.rank-3, .match-card.rank-4 { border-color: rgba(244,114,182,0.2); }
@@ -442,6 +508,47 @@
 
     .rec-text strong { color: var(--text); font-weight: 500; }
 
+   
+    .field-btn {
+      padding: 10px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .field-btn:hover {
+      border-color: var(--accent);
+      background: rgba(110,231,183,0.08);
+    }
+
+    .field-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color: transparent;
+      color: #0d0d0f;
+    }
+
+    .field-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-left: 8px;
+      margin-top: 8px;
+    }
+
+    .field-badge.it { background: rgba(129,140,248,0.15); color: var(--accent2); }
+    .field-badge.hospitality { background: rgba(244,114,182,0.15); color: var(--rank3); }
+    .field-badge.engineering { background: rgba(110,231,183,0.15); color: var(--accent); }
+
     /* Animations */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -450,6 +557,41 @@
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    @keyframes ellipsis {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75%, 100% { content: '...'; }
+    }
+
+    @keyframes topGlow {
+      0%, 100% {
+        box-shadow:
+          0 0 26px rgba(110,231,183,0.28),
+          0 0 48px rgba(110,231,183,0.2),
+          inset 0 0 30px rgba(110,231,183,0.12),
+          0 0 0 1px rgba(110,231,183,0.65);
+      }
+      50% {
+        box-shadow:
+          0 0 38px rgba(110,231,183,0.5),
+          0 0 74px rgba(110,231,183,0.34),
+          inset 0 0 44px rgba(110,231,183,0.2),
+          0 0 0 1px rgba(110,231,183,0.9);
+      }
+    }
+
+    @keyframes glowDrift {
+      0% { transform: translateX(-6%) translateY(0); opacity: 0.1; }
+      50% { transform: translateX(6%) translateY(-2%); opacity: 0.22; }
+      100% { transform: translateX(-6%) translateY(0); opacity: 0.1; }
+    }
+
+    @keyframes scanline {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
   </style>
 </head>
@@ -475,11 +617,21 @@
       <textarea id="resumeInput" placeholder="Paste your resume text here — skills, experience, education..."></textarea>
 
       <button class="match-btn" id="matchBtn" onclick="matchResume()">Find My Matches →</button>
+
+      <div id="fieldFilterContainer" style="display: none; margin-top: 24px;">
+        <div class="card-title">Filter by Field (Optional)</div>
+        <div id="fieldButtons" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+      </div>
     </div>
 
     <div class="loader" id="loader">
       <div class="spinner"></div>
-      Analyzing your resume...
+      <div class="loader-message"><span id="loaderText">Looking for your best match</span><span class="dots"></span></div>
+      <div class="scanline-wrap" aria-hidden="true">
+        <div class="scanline"></div>
+        <div class="scanline"></div>
+        <div class="scanline"></div>
+      </div>
     </div>
 
     <div class="results" id="results">
@@ -498,6 +650,60 @@
     const pdfInput = document.getElementById('pdfInput');
     const fileNameEl = document.getElementById('fileName');
     const resumeInput = document.getElementById('resumeInput');
+    const loaderTextEl = document.getElementById('loaderText');
+    let loaderTextInterval;
+    let availableFields = [];
+    let currentResume = '';
+    let currentMatches = [];
+
+    // Load available fields on page load
+    async function loadAvailableFields() {
+      try {
+        const res = await fetch('http://127.0.0.1:5000/fields');
+        const data = await res.json();
+        availableFields = data.fields || [];
+        renderFieldButtons();
+      } catch (err) {
+        console.log('Could not load fields');
+      }
+    }
+
+    function renderFieldButtons() {
+      const container = document.getElementById('fieldButtons');
+      container.innerHTML = '';
+      
+      availableFields.forEach(field => {
+        const btn = document.createElement('button');
+        btn.className = 'field-btn';
+        btn.textContent = field;
+        btn.onclick = () => filterByField(field, btn);
+        container.appendChild(btn);
+      });
+    }
+
+    function startLoaderTextAnimation() {
+      const phrases = [
+        'Looking for your best match',
+        'Scanning role keywords',
+        'Comparing your strengths'
+      ];
+      let index = 0;
+      loaderTextEl.textContent = phrases[index];
+      clearInterval(loaderTextInterval);
+      loaderTextInterval = setInterval(() => {
+        index = (index + 1) % phrases.length;
+        loaderTextEl.textContent = phrases[index];
+      }, 1300);
+    }
+
+    function stopLoaderTextAnimation() {
+      clearInterval(loaderTextInterval);
+      loaderTextEl.textContent = 'Looking for your best match';
+    }
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     // Drag & drop
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -537,6 +743,15 @@
     const rankLabels = ['🥇 Best Match', '🥈 Strong Match', '🥉 Good Match', '#4 Match', '#5 Match'];
     const rankClasses = ['rank-1', 'rank-2', 'rank-3', 'rank-4', 'rank-5'];
 
+    function getFieldBadge(field) {
+      const fieldLower = (field || 'Information Technology').toLowerCase();
+      let badgeClass = 'it';
+      if (fieldLower.includes('hospitality')) badgeClass = 'hospitality';
+      else if (fieldLower.includes('engineering')) badgeClass = 'engineering';
+      
+      return `<span class="field-badge ${badgeClass}">${field || 'IT'}</span>`;
+    }
+
     function buildExplanation(job, score, index, keywords) {
       const intros = [
         `Your resume is a <strong>strong fit</strong> for this role.`,
@@ -556,7 +771,7 @@
       return `
         <div class="rec-title">💡 Recommendation</div>
         <div class="rec-text">
-          Based on your resume, you are most aligned with <strong>${top.job_title}</strong> roles.
+          Based on your resume, you are most aligned with <strong>${top.job_title}</strong> roles in the <strong>${top.field || 'Information Technology'}</strong> field.
           To improve your match scores, consider adding more <strong>specific technical skills</strong>,
           <strong>measurable achievements</strong>, and <strong>relevant certifications</strong> to your resume.
           Tailoring your resume to include keywords from the job description can significantly boost your compatibility score.
@@ -574,6 +789,10 @@
         'devops': ['docker', 'kubernetes', 'ci/cd', 'aws', 'linux', 'pipeline'],
         'full stack': ['react', 'node', 'javascript', 'api', 'database', 'frontend'],
         'software engineer': ['algorithms', 'data structures', 'system design', 'api', 'oop'],
+        'chef': ['culinary', 'kitchen', 'menu', 'food safety', 'preparation'],
+        'hotel manager': ['hospitality', 'management', 'operations', 'staff', 'guest'],
+        'civil engineer': ['structural', 'cad', 'design', 'project', 'construction'],
+        'mechanical engineer': ['mechanical', 'cad', 'design', 'systems', 'manufacturing'],
       };
       const title = jobTitle.toLowerCase();
       for (const [key, words] of Object.entries(keywordMap)) {
@@ -603,6 +822,7 @@
       const list = document.getElementById('matchesList');
       const rec = document.getElementById('recommendation');
       list.innerHTML = '';
+      currentMatches = matches;
 
       matches.forEach((match, i) => {
         const rankClass = rankClasses[i] || 'rank-5';
@@ -611,12 +831,13 @@
         const explanation = buildExplanation(match.job_title, match.score, i, keywords);
 
         const card = document.createElement('div');
-        card.className = `match-card ${rankClass}`;
+        card.className = `match-card ${rankClass}${i === 0 ? ' top-match-glow' : ''}`;
         card.innerHTML = `
           <div class="card-top">
             <div class="job-info">
               <div class="rank-badge">${rankLabels[i]}</div>
               <div class="job-title">${match.job_title}</div>
+              ${getFieldBadge(match.field)}
             </div>
             ${buildScoreRing(match.score, size)}
           </div>
@@ -639,6 +860,7 @@
       rec.innerHTML = buildRecommendation(matches);
 
       document.getElementById('results').classList.add('active');
+      document.getElementById('fieldFilterContainer').style.display = 'block';
 
       // Animate bars and rings after render
       requestAnimationFrame(() => {
@@ -653,6 +875,32 @@
       });
     }
 
+    async function filterByField(field, btn) {
+      // Deselect all buttons first
+      document.querySelectorAll('.field-btn').forEach(b => b.classList.remove('active'));
+      // Select the clicked button
+      btn.classList.add('active');
+
+      const data = document.getElementById('loader');
+      data.classList.add('active');
+      startLoaderTextAnimation();
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/match-by-field', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resume: currentResume, field: field })
+        });
+        const result = await res.json();
+        displayResults(result.matches);
+      } catch (err) {
+        alert('Error filtering by field');
+      } finally {
+        document.getElementById('loader').classList.remove('active');
+        stopLoaderTextAnimation();
+      }
+    }
+
     async function matchResume() {
       const text = resumeInput.value.trim();
       if (!text || text === 'Extracting text from PDF...') {
@@ -660,18 +908,23 @@
         return;
       }
 
+      currentResume = text;
       const btn = document.getElementById('matchBtn');
       btn.disabled = true;
-      btn.textContent = 'Analyzing...';
+      btn.textContent = 'Looking...';
       document.getElementById('loader').classList.add('active');
+      startLoaderTextAnimation();
       document.getElementById('results').classList.remove('active');
 
       try {
-        const res = await fetch('http://127.0.0.1:5000/match', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ resume: text })
-        });
+        const [res] = await Promise.all([
+          fetch('http://127.0.0.1:5000/match', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resume: text })
+          }),
+          wait(1400)
+        ]);
         const data = await res.json();
         displayResults(data.matches);
       } catch {
@@ -680,8 +933,12 @@
         btn.disabled = false;
         btn.textContent = 'Find My Matches →';
         document.getElementById('loader').classList.remove('active');
+        stopLoaderTextAnimation();
       }
     }
+
+    // Load fields when page loads
+    window.addEventListener('load', loadAvailableFields);
   </script>
 </body>
 </html>
