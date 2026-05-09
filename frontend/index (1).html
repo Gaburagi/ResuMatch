@@ -579,6 +579,75 @@
   color: #0d0d0f;
 }
 
+/* Live toggle */
+.source-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.source-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--border);
+  border-radius: 99px;
+  transition: 0.3s;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+  margin-right: 5px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
     /* Animations */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -651,6 +720,15 @@
   <button class="model-btn" id="btnSbert" onclick="selectModel('sbert')">🤖 SBERT</button>
 </div>
 
+<div class="source-toggle">
+  <span class="source-label">Dataset</span>
+  <label class="toggle-switch">
+    <input type="checkbox" id="liveToggle" onchange="toggleSource()">
+    <span class="toggle-slider"></span>
+  </label>
+  <span class="source-label" id="sourceLabel">Static</span>
+</div>
+
       <button class="match-btn" id="matchBtn" onclick="matchResume()">Find My Matches →</button>
 
       <div id="fieldFilterContainer" style="display: none; margin-top: 24px;">
@@ -692,6 +770,16 @@
     let currentMatches = [];
 
 let selectedModel = 'tfidf';
+
+let useLiveJobs = false;
+
+function toggleSource() {
+  useLiveJobs = document.getElementById('liveToggle').checked;
+  const label = document.getElementById('sourceLabel');
+  label.innerHTML = useLiveJobs 
+    ? '<span class="live-dot"></span>Live' 
+    : 'Static';
+}
 
 function selectModel(model) {
   selectedModel = model;
@@ -960,8 +1048,9 @@ function selectModel(model) {
       document.getElementById('results').classList.remove('active');
 
       try {
+        const endpoint = useLiveJobs ? 'live-jobs' : 'match';
         const [res] = await Promise.all([
-          fetch('http://127.0.0.1:5000/match', {
+          fetch(`http://127.0.0.1:5000/${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ resume: text, model: selectedModel })
