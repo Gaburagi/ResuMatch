@@ -648,6 +648,200 @@
   50% { opacity: 0.3; }
 }
 
+    /* Chatbot */
+    .chat-bubble {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 1000;
+    }
+
+    .chat-toggle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 20px rgba(110,231,183,0.35);
+      transition: transform 0.2s;
+      margin-left: auto;
+    }
+
+    .chat-toggle:hover { transform: scale(1.08); }
+
+    .chat-window {
+      position: absolute;
+      bottom: 68px;
+      right: 0;
+      width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .chat-window.open { display: flex; }
+
+    .chat-header {
+      padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(129,140,248,0.1));
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .chat-header-info { flex: 1; }
+
+    .chat-header-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .chat-header-status {
+      font-size: 0.7rem;
+      color: var(--accent);
+    }
+
+    .chat-messages {
+      padding: 16px;
+      height: 260px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .chat-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    .chat-msg.bot {
+      background: var(--surface2);
+      color: var(--text);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-msg.user {
+      background: linear-gradient(135deg, rgba(110,231,183,0.2), rgba(129,140,248,0.2));
+      color: var(--text);
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-suggestions {
+      padding: 0 16px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chat-suggestion {
+      padding: 5px 12px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chat-suggestion:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus { border-color: var(--accent); }
+    .chat-input::placeholder { color: var(--muted); }
+
+    .chat-send {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+
+    .chat-send:hover { opacity: 0.85; }
+
+    .chat-notify {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 16px;
+      height: 16px;
+      background: var(--rank3);
+      border-radius: 50%;
+      font-size: 0.6rem;
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
     /* Animations */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -754,8 +948,128 @@
     </div>
   </div>
 
+  <!-- Chatbot -->
+  <div class="chat-bubble" id="chatBubble" style="display:none">
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header">
+        <div class="chat-avatar">🤖</div>
+        <div class="chat-header-info">
+          <div class="chat-header-name">ResuBot</div>
+          <div class="chat-header-status">● Online</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-suggestions" id="chatSuggestions">
+        <button class="chat-suggestion" onclick="sendSuggestion(this)">What skills should I add?</button>
+        <button class="chat-suggestion" onclick="sendSuggestion(this)">How do I improve my score?</button>
+        <button class="chat-suggestion" onclick="sendSuggestion(this)">Tell me about my top match</button>
+        <button class="chat-suggestion" onclick="sendSuggestion(this)">What certifications help?</button>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chatInput" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter') sendChat()"/>
+        <button class="chat-send" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+    <div style="position:relative">
+      <button class="chat-toggle" onclick="toggleChat()">💬</button>
+      <div class="chat-notify" id="chatNotify">1</div>
+    </div>
+  </div>
+
   <script>
-    // PDF.js setup
+    // ── Chatbot ───────────────────────────────────────
+    let chatOpen = false;
+    let chatGreeted = false;
+    let topJobTitle = '';
+
+    const responses = {
+      skills: [
+        "Based on your top match, focus on strengthening your core technical skills. Add specific tools and frameworks relevant to the role — the more precise, the better your match score!",
+        "Try listing your skills with proficiency levels (e.g. 'Python — Advanced'). Recruiters and matching systems both love specificity.",
+      ],
+      improve: [
+        "To improve your score, tailor your resume to include keywords from the job description. Use the same terminology the job posting uses!",
+        "Add quantifiable achievements — numbers stand out. Instead of 'managed a team', say 'managed a team of 8 engineers delivering 3 projects on time'.",
+      ],
+      match: [
+        `Your top match is **${topJobTitle}**! This role aligned best with the skills and experience in your resume. Consider applying and tailoring your resume specifically for this role.`,
+        `The match score reflects how much your resume vocabulary overlaps with the job description. A score above 20% with TF-IDF is actually quite solid!`,
+      ],
+      certifications: [
+        "Certifications can significantly boost your resume. Look for industry-recognized ones like AWS, Google, or role-specific certifications relevant to your top match.",
+        "Online platforms like Coursera, Udemy, and LinkedIn Learning offer affordable certifications that can strengthen your profile for your matched roles.",
+      ],
+      score: [
+        "Match scores are calculated using TF-IDF cosine similarity — the more your resume text overlaps with job descriptions, the higher your score.",
+        "Don't worry if scores seem low — even a 15-20% TF-IDF score indicates meaningful overlap. SBERT scores tend to be higher as it understands semantic meaning.",
+      ],
+      default: [
+        "That's a great question! Try asking me about your skills, match score, top job, or certifications.",
+        "I'm here to help with your job search! Ask me about improving your resume, understanding your score, or what skills to add.",
+        "Hmm, I'm not sure about that one. Try asking: 'What skills should I add?' or 'How do I improve my score?'",
+      ]
+    };
+
+    function getBotResponse(input) {
+      const q = input.toLowerCase();
+      if (q.includes('skill')) return responses.skills[Math.floor(Math.random() * responses.skills.length)];
+      if (q.includes('improv') || q.includes('better') || q.includes('boost')) return responses.improve[Math.floor(Math.random() * responses.improve.length)];
+      if (q.includes('match') || q.includes('top') || q.includes('job')) {
+        responses.match[0] = `Your top match is **${topJobTitle}**! This role aligned best with the skills and experience in your resume. Consider tailoring your resume specifically for this role.`;
+        return responses.match[Math.floor(Math.random() * responses.match.length)];
+      }
+      if (q.includes('cert')) return responses.certifications[Math.floor(Math.random() * responses.certifications.length)];
+      if (q.includes('score') || q.includes('percent') || q.includes('%') || q.includes('tfidf') || q.includes('sbert')) return responses.score[Math.floor(Math.random() * responses.score.length)];
+      return responses.default[Math.floor(Math.random() * responses.default.length)];
+    }
+
+    function addMessage(text, type) {
+      const msgs = document.getElementById('chatMessages');
+      const msg = document.createElement('div');
+      msg.className = `chat-msg ${type}`;
+      msg.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      msgs.appendChild(msg);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function toggleChat() {
+      chatOpen = !chatOpen;
+      document.getElementById('chatWindow').classList.toggle('open', chatOpen);
+      document.getElementById('chatNotify').style.display = 'none';
+      if (chatOpen && !chatGreeted) {
+        chatGreeted = true;
+        setTimeout(() => {
+          addMessage(`👋 Hey! I'm ResuBot. I see your top match is **${topJobTitle || 'loading...'}**. Want tips on how to improve your chances? Ask me anything!`, 'bot');
+        }, 300);
+      }
+    }
+
+    function sendChat() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      input.value = '';
+      setTimeout(() => addMessage(getBotResponse(text), 'bot'), 600);
+    }
+
+    function sendSuggestion(btn) {
+      const text = btn.textContent;
+      addMessage(text, 'user');
+      setTimeout(() => addMessage(getBotResponse(text), 'bot'), 600);
+    }
+
+    function showChatbot(topJob) {
+      topJobTitle = topJob;
+      const bubble = document.getElementById('chatBubble');
+      bubble.style.display = 'block';
+      const notify = document.getElementById('chatNotify');
+      notify.style.display = 'flex';
+      setTimeout(() => {
+        if (!chatOpen) toggleChat();
+      }, 1500);
+    }
+    // ── End Chatbot ───────────────────────────────────
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -992,6 +1306,9 @@ function selectModel(model) {
 
       document.getElementById('results').classList.add('active');
       document.getElementById('fieldFilterContainer').style.display = 'block';
+
+      // Show chatbot after results load
+      showChatbot(matches[0].job_title);
 
       // Animate bars and rings after render
       requestAnimationFrame(() => {
